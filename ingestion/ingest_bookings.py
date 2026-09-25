@@ -4,10 +4,28 @@
 """
 from datetime import date
 
+from common import check_columns, fetch_csv
+
+BOOKING_COLS = [
+    "passenger_id", "flight_id", "airport_id", "seat_class", "amount", "currency",
+    "booking_date", "booking_channel",
+]
+
+
+def _daily_file(day: date = None, init: bool = False):
+    if init:
+        return "init", "bookings.csv"
+    assert day is not None
+    return day.strftime("%Y-%m"), f"bookings_{day.isoformat()}.csv"
+
 
 def ingest_bronze(day: date = None, init: bool = False):
-    # TODO : télécharger le fichier bookings du jour (ou de init/) vers bronze/.
-    raise NotImplementedError
+    """Rapatrie le fichier des réservations du jour (ou de init/) tel quel dans bronze/.
+    Contrairement aux 3 autres entités, ce n'est pas un snapshot complet mais uniquement les
+    réservations effectuées ce jour-là."""
+    subdir, filename = _daily_file(day, init)
+    df = fetch_csv(subdir, filename)
+    check_columns(df, ["booking_id"] + BOOKING_COLS, filename)
 
 
 def create_silver_table(con):

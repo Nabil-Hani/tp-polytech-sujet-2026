@@ -4,10 +4,26 @@
 """
 from datetime import date
 
+from common import check_columns, fetch_csv
+
+FLIGHT_COLS = [
+    "flight_number", "airline", "origin_airport_id", "destination_airport_id",
+    "flight_date", "departure_time", "arrival_time", "aircraft_type",
+]
+
+
+def _snapshot_file(day: date = None, init: bool = False):
+    if init:
+        return "init", "flights.csv"
+    assert day is not None
+    return day.strftime("%Y-%m"), f"flights_{day.isoformat()}.csv"
+
 
 def ingest_bronze(day: date = None, init: bool = False):
-    # TODO : télécharger le snapshot flights du jour (ou de init/) vers bronze/.
-    raise NotImplementedError
+    """Rapatrie le snapshot complet des vols du jour (ou de init/) tel quel dans bronze/."""
+    subdir, filename = _snapshot_file(day, init)
+    df = fetch_csv(subdir, filename)
+    check_columns(df, ["flight_id"] + FLIGHT_COLS, filename)
 
 
 def create_silver_table(con):

@@ -12,7 +12,7 @@ directement d'un objet Python de l'étape d'avant.
 """
 from datetime import date
 
-from common import fetch_csv, get_connection
+from common import check_columns, fetch_csv, get_connection
 
 AIRPORT_COLS = ["iata_code", "airport_name", "city", "country"]
 
@@ -25,9 +25,10 @@ def _snapshot_file(day: date = None, init: bool = False):
 
 
 def ingest_bronze(day: date = None, init: bool = False):
-    # TODO : Doit télécharger le snapshot du jour vers bronze/ (ou vers init/).
-    # utiliser fetch_csv() de common.py (à implémenter aussi) pour rapatrier la données.
-    raise NotImplementedError
+    """Rapatrie le snapshot du jour (ou de init/) tel quel dans bronze/."""
+    subdir, filename = _snapshot_file(day, init)
+    df = fetch_csv(subdir, filename)
+    check_columns(df, ["airport_id"] + AIRPORT_COLS, filename)
 
 
 def create_silver_table(con):
